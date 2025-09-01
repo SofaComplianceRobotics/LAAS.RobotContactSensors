@@ -1,0 +1,64 @@
+[Window.       Input/Output]
+open = false
+
+
+[Window.       Program]
+open = false
+
+
+[Window.       My Robot]
+open = false
+
+
+[Window.       Move]
+open = false
+
+
+[Window.       Plotting]
+open = false
+
+
+[Window.       Viewport]
+open = true
+width = 2893.000000
+height = 1318.000000
+dockId = 5
+
+
+[Window.       Scene Graph]
+open = true
+width = 720.000000
+height = 1832.000000
+dockId = 3
+
+
+[Window.       Log]
+open = true
+width = 2893.000000
+height = 512.000000
+dockId = 6
+
+
+[2]
+width = 720.000000
+height = 1832.000000
+
+
+[4]
+width = 720.000000
+height = 719.000000
+
+
+[3]
+width = 720.000000
+height = 1832.000000
+
+
+[6]
+width = 2893.000000
+height = 512.000000
+
+
+[5]
+width = 2893.000000
+height = 1318.000000
