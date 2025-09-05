@@ -1043,7 +1043,7 @@
   <!--***********************-->
   <!--       FT TOOL         -->
   <!--***********************-->
-  <!-- <link name="wrist_left_ft_tool_link">
+  <link name="wrist_left_ft_tool_link">
     <inertial>
       <mass value="0.001"/>
       <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
@@ -1186,7 +1186,7 @@
     <limit effort="100.0" lower="-1.0471975511965976" upper="0.0" velocity="1.0"/>
     <mimic joint="gripper_left_joint" multiplier="1.0" offset="0.0"/>
   </joint>
-  <link name="gripper_left_fingertip_1_link">
+  <!-- <link name="gripper_left_fingertip_1_link">
     <inertial>
       <mass value="0.026301"/>
       <inertia ixx="8e-06" ixy="0" ixz="0" iyy="8.69179e-06" iyz="-1.43612e-06" izz="2.3082e-06"/>
@@ -1225,8 +1225,8 @@
     <axis xyz="1 0 0"/>
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_left_joint" multiplier="-1.0" offset="0.0"/>
-  </joint>
-  <link name="gripper_left_fingertip_2_link">
+  </joint> -->
+  <!-- <link name="gripper_left_fingertip_2_link">
     <inertial>
       <mass value="0.026301"/>
       <inertia ixx="8e-06" ixy="0" ixz="0" iyy="8.69179e-06" iyz="-1.43612e-06" izz="2.3082e-06"/>
@@ -1265,7 +1265,7 @@
     <axis xyz="1 0 0"/>
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_left_joint" multiplier="-1.0" offset="0.0"/>
-  </joint>
+  </joint> -->
   <link name="gripper_left_motor_single_link">
     <inertial>
       <mass value="0.107923"/>
@@ -1346,7 +1346,7 @@
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_left_joint" multiplier="-1.0" offset="0.0"/>
   </joint>
-  <link name="gripper_left_fingertip_3_link">
+  <!-- <link name="gripper_left_fingertip_3_link">
     <inertial>
       <mass value="0.026301"/>
       <inertia ixx="8e-06" ixy="0" ixz="0" iyy="8.69179e-06" iyz="-1.43612e-06" izz="2.3082e-06"/>
@@ -1385,7 +1385,7 @@
     <axis xyz="1 0 0"/>
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_left_joint" multiplier="-1.0" offset="0.0"/>
-  </joint>
+  </joint> -->
   <link name="gripper_left_fingertip_1_dummy_mimic_link"/>
   <joint name="gripper_left_fingertip_1_joint_mimic" type="fixed">
     <parent link="gripper_left_base_link"/>
@@ -1416,11 +1416,11 @@
     <parent link="gripper_left_base_link"/>
     <child link="gripper_left_inner_double_dummy_mimic_link"/>
   </joint>
-  <link name="gripper_left_link_dummy_mimic_link"/>
+  <!-- <link name="gripper_left_link_dummy_mimic_link"/>
   <joint name="gripper_left_link_joint_mimic" type="fixed">
     <parent link="gripper_left_base_link"/>
     <child link="gripper_left_link_dummy_mimic_link"/>
-  </joint>
+  </joint>-->
   <link name="gripper_right_base_link">
     <inertial>
       <mass value="0.637534"/>
@@ -1539,7 +1539,7 @@
     <limit effort="100.0" lower="-1.0471975511965976" upper="0.0" velocity="1.0"/>
     <mimic joint="gripper_right_joint" multiplier="1.0" offset="0.0"/>
   </joint>
-  <link name="gripper_right_fingertip_1_link">
+  <!-- <link name="gripper_right_fingertip_1_link">
     <inertial>
       <mass value="0.026301"/>
       <inertia ixx="8e-06" ixy="0" ixz="0" iyy="8.69179e-06" iyz="-1.43612e-06" izz="2.3082e-06"/>
@@ -1618,7 +1618,7 @@
     <axis xyz="1 0 0"/>
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_right_joint" multiplier="-1.0" offset="0.0"/>
-  </joint>
+  </joint> -->
   <link name="gripper_right_motor_single_link">
     <inertial>
       <mass value="0.107923"/>
@@ -1699,7 +1699,7 @@
     <limit effort="100.0" lower="0.0" upper="1.0471975511965976" velocity="1.0"/>
     <mimic joint="gripper_right_joint" multiplier="-1.0" offset="0.0"/>
   </joint>
-  <link name="gripper_right_fingertip_3_link">
+  <!-- <link name="gripper_right_fingertip_3_link">
     <inertial>
       <mass value="0.026301"/>
       <inertia ixx="8e-06" ixy="0" ixz="0" iyy="8.69179e-06" iyz="-1.43612e-06" izz="2.3082e-06"/>
@@ -1758,7 +1758,7 @@
   <joint name="gripper_right_fingertip_3_joint_mimic" type="fixed">
     <parent link="gripper_right_base_link"/>
     <child link="gripper_right_fingertip_3_dummy_mimic_link"/>
-  </joint>
+  </joint> -->
   <link name="gripper_right_motor_single_dummy_mimic_link"/>
   <joint name="gripper_right_motor_single_joint_mimic" type="fixed">
     <parent link="gripper_right_base_link"/>
@@ -1773,7 +1773,7 @@
   <joint name="gripper_right_link_joint_mimic" type="fixed">
     <parent link="gripper_right_base_link"/>
     <child link="gripper_right_link_dummy_mimic_link"/>
-  </joint>
+  </joint> 
   <link name="leg_left_1_link">
     <inertial>
       <mass value="2.235009"/>
@@ -1813,9 +1813,9 @@
     <axis xyz="0 0 1"/>
     <limit effort="100" lower="-0.3490658503988659" upper="1.5707963267948966" velocity="3.87"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint hip_x (mesh link) ; child link hip_y -> parent link hip_z -->
-  <!-- <link name="leg_left_2_link">
+  <link name="leg_left_2_link">
     <inertial>
       <mass value="1.490952"/>
       <inertia ixx="0.00497152259" ixy="-0.0001311358" ixz="-4.86648e-06" iyy="0.00190550993" iyz="4.585381e-05" izz="0.00474289754"/>
@@ -1854,9 +1854,9 @@
     <axis xyz="1 0 0"/>
     <limit effort="160" lower="-0.5236" upper="0.5236" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint hip_y (mesh link) ; child link knee -> parent link hip_x -->
-  <!-- <link name="leg_left_3_link">
+  <link name="leg_left_3_link">
     <inertial>
       <mass value="6.239871"/>
       <inertia ixx="0.15337403915" ixy="0.00068913396" ixz="0.00168034366" iyy="0.13648139346" iyz="-0.02187635445" izz="0.03001594885"/>
@@ -1895,9 +1895,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="160" lower="-2.095" upper="0.7" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint knee (mesh link) ; child link ankle_y -> parent link hip_y -->
-  <!-- <link name="leg_left_4_link">
+  <link name="leg_left_4_link">
     <inertial>
       <mass value="3.759951"/>
       <inertia ixx="0.04287677484" ixy="0.00043705397" ixz="0.00078292368" iyy="0.03598906971" iyz="0.00037717694" izz="0.01364791564"/>
@@ -1936,9 +1936,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="400" lower="0" upper="2.618" velocity="7"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint ankle_y (mesh link) ; child link ankle_x -> parent link knee -->
-  <!-- <link name="leg_left_5_link">
+  <link name="leg_left_5_link">
     <inertial>
       <mass value="1.29096"/>
       <inertia ixx="0.01143430819" ixy="0.00096978273" ixz="0.00039976581" iyy="0.00888974312" iyz="-0.00277808667" izz="0.00506373875"/>
@@ -1977,9 +1977,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="160" lower="-1.27" upper="0.68" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint ankle_x (mesh link) ; child link None -> parent link ankle_y -->
-  <!-- <link name="leg_left_6_link">
+  <link name="leg_left_6_link">
     <inertial>
       <mass value="1.597773"/>
       <inertia ixx="0.00439027267" ixy="-6.743674e-05" ixz="0.00113816363" iyy="0.00743063029" iyz="3.943143e-05" izz="0.00550906699"/>
@@ -2006,9 +2006,9 @@
     <axis xyz="1 0 0"/>
     <limit effort="100" lower="-0.5236" upper="0.5236" velocity="4.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- from here is copy paste -->
-  <!-- <link name="left_sole_link">
+  <link name="left_sole_link">
     <inertial>
       <mass value="0.01"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
@@ -2045,9 +2045,9 @@
     <parent link="left_sole_link"/>
     <child link="left_foot_lower_right"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.05 0.0"/>
-  </joint> -->
+  </joint>
   <!-- contact model for foot surface -->
-  <!-- <link name="leg_right_1_link">
+  <link name="leg_right_1_link">
     <inertial>
       <mass value="2.235009"/>
       <inertia ixx="0.01049849" ixy="0.00004097" ixz="0.00009771" iyy="0.00534086" iyz="-0.0011949" izz="0.00708595"/>
@@ -2086,9 +2086,9 @@
     <axis xyz="0 0 1"/>
     <limit effort="100" lower="-1.5707963267948966" upper="0.3490658503988659" velocity="3.87"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint hip_x (mesh link) ; child link hip_y -> parent link hip_z -->
-  <!-- <link name="leg_right_2_link">
+  <link name="leg_right_2_link">
     <inertial>
       <mass value="1.490952"/>
       <inertia ixx="0.00497152259" ixy="0.0001311358" ixz="-4.86648e-06" iyy="0.00190550993" iyz="-4.585381e-05" izz="0.00474289754"/>
@@ -2127,9 +2127,9 @@
     <axis xyz="1 0 0"/>
     <limit effort="160" lower="-0.5236" upper="0.5236" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint hip_y (mesh link) ; child link knee -> parent link hip_x -->
-  <!-- <link name="leg_right_3_link">
+  <link name="leg_right_3_link">
     <inertial>
       <mass value="6.239871"/>
       <inertia ixx="0.15337403915" ixy="-0.00068913396" ixz="0.00168034366" iyy="0.13648139346" iyz="0.02187635445" izz="0.03001594885"/>
@@ -2168,9 +2168,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="160" lower="-2.095" upper="0.7" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint knee (mesh link) ; child link ankle_y -> parent link hip_y -->
-  <!-- <link name="leg_right_4_link">
+  <link name="leg_right_4_link">
     <inertial>
       <mass value="3.759951"/>
       <inertia ixx="0.04287677484" ixy="-0.00043705397" ixz="0.00078292368" iyy="0.03598906971" iyz="-0.00037717694" izz="0.01364791564"/>
@@ -2209,9 +2209,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="400" lower="0" upper="2.618" velocity="7"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint ankle_y (mesh link) ; child link ankle_x -> parent link knee -->
-  <!-- <link name="leg_right_5_link">
+  <link name="leg_right_5_link">
     <inertial>
       <mass value="1.29096"/>
       <inertia ixx="0.01143430819" ixy="-0.00096978273" ixz="0.00039976581" iyy="0.00888974312" iyz="0.00277808667" izz="0.00506373875"/>
@@ -2250,9 +2250,9 @@
     <axis xyz="0 1 0"/>
     <limit effort="160" lower="-1.27" upper="0.68" velocity="5.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- Joint ankle_x (mesh link) ; child link None -> parent link ankle_y -->
-  <!-- <link name="leg_right_6_link">
+  <link name="leg_right_6_link">
     <inertial>
       <mass value="1.597773"/>
       <inertia ixx="0.00439027267" ixy="6.743674e-05" ixz="0.00113816363" iyy="0.00743063029" iyz="-3.943143e-05" izz="0.00550906699"/>
@@ -2279,9 +2279,9 @@
     <axis xyz="1 0 0"/>
     <limit effort="100" lower="-0.5236" upper="0.5236" velocity="4.8"/>
     <dynamics damping="0.0" friction="0.0"/>
-  </joint> -->
+  </joint>
   <!-- from here is copy paste -->
-  <!-- <link name="right_sole_link">
+  <link name="right_sole_link">
     <inertial>
       <mass value="0.01"/>
       <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
@@ -2318,7 +2318,7 @@
     <parent link="right_sole_link"/>
     <child link="right_foot_lower_right"/>
     <origin rpy="0 0 0" xyz="-0.1 -0.05 0.0"/>
-  </joint> -->
+  </joint>
   <!-- contact model for foot surface -->
   <material name="Blue">
     <color rgba="0.0 0.0 0.8 1.0"/>
