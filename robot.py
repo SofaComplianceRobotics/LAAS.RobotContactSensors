@@ -1,33 +1,35 @@
-class TalosHumanoidRobot:
+import Sofa
 
-    def __init__(self, rootnode):
-        self.rootnode = rootnode
+class TalosHumanoidRobot(Sofa.Prefab):
+
+    def __init__(self):
+        Sofa.Prefab.__init__(self)
+        self.name = 'TalosHumanoidRobot'
 
         # Add the robot model to the scene graph
-        self.node = rootnode.addChild('TalosHumanoidRobot')
         self.__addRobot()
 
     def __addRobot(self):
 
         # Robot node
-        settings = self.node.addChild('Settings')
+        settings = self.addChild('Settings')
         settings.addObject("RequiredPlugin", name="Sofa.RigidBodyDynamics") # Needed to use components [URDFModelLoader]
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mapping.NonLinear') # Needed to use components [RigidMapping]  
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mass') # Needed to use components [UniformMass]
         settings.addObject('RequiredPlugin', name='Sofa.Component.Topology.Container.Constant') # Needed to use components [MeshTopology]  
         settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]  
 
-        self.node.addObject('URDFModelLoader', 
+        self.addObject('URDFModelLoader', 
                             filename="data/talos.urdf", 
                             modelDirectory="data/meshes/", 
                             useFreeFlyerRootJoint=False, 
                             printLog=False, 
                             addCollision=False, 
                             addJointsActuators=False)
-        robot = self.node.getChild("Robot")
+        robot = self.getChild("Robot")
         mechanical = robot.Model.getMechanicalState()
         mechanical.showObject = True
-        mechanical.showObjectScale = 30
+        mechanical.showObjectScale = 0.05
         mechanical.drawMode = 0
     
 
@@ -43,16 +45,17 @@ def createScene(rootnode):
     addSolvers(simulation, rayleighStiffness=0.001)
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
-    rootnode.dt = 0.001
-    rootnode.gravity = [0., -9810., 0.]
+    # Units are in m, kg, s
+    rootnode.dt = 0.01
+    rootnode.gravity = [0., -9.81, 0.]
 
     # Robot
-    robot = TalosHumanoidRobot(simulation).node.Robot
+    simulation.addChild(TalosHumanoidRobot())
+    robot = simulation.TalosHumanoidRobot.Robot
 
     # Direct problem
-    for i in range(6):
+    for i in range(len(robot.getMechanicalState().position.value)):
         joint = robot.addObject('JointConstraint', template='Vec1', name='joint' + str(i), index=i, valueType="angle", value=0)
         MyGui.MyRobotWindow.addSetting("Joint" + str(i), joint.value, -pi, pi)
-        robot.addObject("RestShapeSpringsForceField", template='Vec1', points=[3], stiffness=1e12)
 
     return

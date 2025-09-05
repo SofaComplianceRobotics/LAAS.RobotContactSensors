@@ -7,7 +7,10 @@ open = false
 
 
 [Window.       My Robot]
-open = false
+open = true
+width = 720.000000
+height = 967.000000
+dockId = 4
 
 
 [Window.       Move]
@@ -28,7 +31,7 @@ dockId = 5
 [Window.       Scene Graph]
 open = true
 width = 720.000000
-height = 1832.000000
+height = 863.000000
 dockId = 3
 
 
@@ -46,12 +49,12 @@ height = 1832.000000
 
 [4]
 width = 720.000000
-height = 719.000000
+height = 967.000000
 
 
 [3]
 width = 720.000000
-height = 1832.000000
+height = 863.000000
 
 
 [6]
