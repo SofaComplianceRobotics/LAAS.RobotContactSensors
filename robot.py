@@ -27,10 +27,10 @@ class TalosHumanoidRobot(Sofa.Prefab):
                         printLog=False, 
                         addCollision=False, 
                         addJointsActuators=False,
-                        qInit = [ 0., 0., -0.448041, 0.896082, -0.448041, 0., 0., 0., 
-                                 -0.448041, 0.896082, -0.448041, 0., 0., 0., -0.75847, 
-                                 0.173046, 0.2502, -1.725366, 0.6, 0.9, 0., 0., 0., 0., 
-                                 0., 0.75847, -0.173046, -0.2502, -1.725366, -0.6, -0.9, 0., 0., 0., 0., 0., 0., 0.]
+                        # qInit = [ 0., 0., -0.448041, 0.896082, -0.448041, 0., 0., 0., 
+                        #          -0.448041, 0.896082, -0.448041, 0., 0., 0., -0.75847, 
+                        #          0.173046, 0.2502, -1.725366, 0.6, 0.9, 0., 0., 0., 0., 
+                        #          0., 0.75847, -0.173046, -0.2502, -1.725366, -0.6, -0.9, 0., 0., 0., 0., 0., 0., 0.]
                                  )
         robot = self.getChild("Robot")
         mechanical = robot.Model.getMechanicalState()
@@ -74,6 +74,6 @@ def createScene(rootnode):
         MyGui.MyRobotWindow.addSetting(jointName, joint.value, -pi, pi)
     # This does not work I don't know why
     # Thus we have to hard code the initial configuration in the first call of URDFModelLoader
-    # simulation.TalosHumanoidRobot.URDFModelLoader.qInit.value = positions
+    robot.getMechanicalState().position.value = positions
 
     return

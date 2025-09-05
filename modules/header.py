@@ -1,6 +1,6 @@
 def addHeader(rootnode,
               inverse=False, multithreading=True,
-              mouseStiffness=1000, friction=0.6,
+              friction=0.6,
               withCollision=False, withConstraint=True):
 
     # RequiredPlugins
@@ -25,10 +25,9 @@ def addHeader(rootnode,
                                    ])
 
     # Utilities
-    rootnode.addObject('AttachBodyButtonSetting', stiffness=mouseStiffness)
     rootnode.addObject("DefaultVisualManagerLoop")
     rootnode.addObject('VisualStyle')
-    rootnode.gravity = [0, 0, 9810]
+    rootnode.gravity = [0, 0, -9.81]
     rootnode.dt = 0.01
 
     modelling = rootnode.addChild('Modelling')
