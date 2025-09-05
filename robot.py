@@ -1,4 +1,5 @@
 import Sofa
+import numpy as np
 
 class TalosHumanoidRobot(Sofa.Prefab):
 
@@ -20,16 +21,21 @@ class TalosHumanoidRobot(Sofa.Prefab):
         settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]  
 
         self.addObject('URDFModelLoader', 
-                            filename="data/talos.urdf", 
-                            modelDirectory="data/meshes/", 
-                            useFreeFlyerRootJoint=False, 
-                            printLog=False, 
-                            addCollision=False, 
-                            addJointsActuators=False)
+                        filename="data/talos.urdf", 
+                        modelDirectory="data/meshes/", 
+                        useFreeFlyerRootJoint=False, 
+                        printLog=False, 
+                        addCollision=False, 
+                        addJointsActuators=False,
+                        qInit = [ 0., 0., -0.448041, 0.896082, -0.448041, 0., 0., 0., 
+                                 -0.448041, 0.896082, -0.448041, 0., 0., 0., -0.75847, 
+                                 0.173046, 0.2502, -1.725366, 0.6, 0.9, 0., 0., 0., 0., 
+                                 0., 0.75847, -0.173046, -0.2502, -1.725366, -0.6, -0.9, 0., 0., 0., 0., 0., 0., 0.]
+                                 )
         robot = self.getChild("Robot")
         mechanical = robot.Model.getMechanicalState()
         mechanical.showObject = True
-        mechanical.showObjectScale = 0.05
+        mechanical.showObjectScale = 0.01
         mechanical.drawMode = 0
     
 
@@ -39,6 +45,7 @@ def createScene(rootnode):
     from modules.header import addHeader, addSolvers
     import Sofa.ImGui as MyGui
     from math import pi
+    from modules.robotconfigurations import talos_ctrl_joint_infos_grasp as talosInitConfiguration
 
     settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=False, friction=0)
 
@@ -54,8 +61,19 @@ def createScene(rootnode):
     robot = simulation.TalosHumanoidRobot.Robot
 
     # Direct problem
-    for i in range(len(robot.getMechanicalState().position.value)):
-        joint = robot.addObject('JointConstraint', template='Vec1', name='joint' + str(i), index=i, valueType="angle", value=0)
-        MyGui.MyRobotWindow.addSetting("Joint" + str(i), joint.value, -pi, pi)
+    names = robot.Joints.children
+    positions = np.copy(robot.getMechanicalState().position.value)
+    for i in range(len(positions)):
+        jointName = names[i+1].name.value
+        value = 0 if jointName not in talosInitConfiguration else talosInitConfiguration[jointName].pos_desired
+        positions[i] = value
+        joint = robot.addObject('JointConstraint', template='Vec1', name='joint' + str(i), index=i, 
+                                valueType="angle", 
+                                value=value
+                                )
+        MyGui.MyRobotWindow.addSetting(jointName, joint.value, -pi, pi)
+    # This does not work I don't know why
+    # Thus we have to hard code the initial configuration in the first call of URDFModelLoader
+    # simulation.TalosHumanoidRobot.URDFModelLoader.qInit.value = positions
 
     return
