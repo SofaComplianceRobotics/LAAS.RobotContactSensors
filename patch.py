@@ -7,6 +7,7 @@ class Patch(Sofa.Prefab):
 
     def __init__(self,
                  name: str,
+                 simulationNode: Sofa.Core.Node,
                  attachNode: Sofa.Core.Node,
                  attachIndex: int=0,
                  cellGrid: tuple[int]=[1, 1],
@@ -15,6 +16,7 @@ class Patch(Sofa.Prefab):
         Sofa.Prefab.__init__(self)
 
         self.name = name
+        self.simulationNode = simulationNode
         self.attachNode = attachNode
         self.attachIndex = attachIndex
         self.cellGrid = cellGrid
@@ -43,7 +45,8 @@ class Patch(Sofa.Prefab):
     def __addCells(self):
         for i in range(self.cellGrid[0]):
             for j in range(self.cellGrid[1]):
-                cell = Cell(name="Cell"+str(i)+str(j),
+                cell = Cell(name=self.name.value + "Cell"+str(i)+str(j),
+                            simulationNode=self.simulationNode,
                             attachNode=self,
                             attachIndex=i*self.cellGrid[1]+j,
                             )
@@ -60,7 +63,9 @@ def createScene(rootnode):
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
     robot = simulation.addChild("Robot")
-    robot.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0.001, 0, 0, 0, 1]])
+    robot.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0, 0, 0, 0, 1]],
+                    showObject=True, showObjectScale=0.01, drawMode=2)
     robot.addObject("FixedProjectiveConstraint", indices=[0])
 
-    Patch(attachNode=robot, attachIndex=0, name="Patch", cellGrid=[5, 5])
+    Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch1", cellGrid=[5, 5], origin=[0, 0.1, 0, 0, 0.707, 0, 0.707])
+    Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch2", cellGrid=[5, 5], origin=[0, 0, 0, 0, 0, 0, 1])

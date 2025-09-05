@@ -12,12 +12,14 @@ class Cell(Sofa.Prefab):
 
     def __init__(self, 
                  name: str,
+                 simulationNode: Sofa.Core.Node,
                  attachNode: Sofa.Core.Node,
-                 attachIndex: int=0
+                 attachIndex: int=0,
                  ):
         Sofa.Prefab.__init__(self)
 
         self.name = name
+        self.simulationNode = simulationNode
         self.attachNode = attachNode
         self.attachIndex = attachIndex
 
@@ -85,11 +87,11 @@ class Cell(Sofa.Prefab):
                        showObject=False, showObjectScale=5e-4, drawMode=2)
         all.addObject("UniformMass", totalMass=self.totalMass)
 
-        rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
-        rigidified.addObject("MechanicalObject", position=[self.positions[1:]],
+        self.rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
+        self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]],
                              showObject=False, showObjectScale=5e1, drawMode=0, showColor=[255, 0, 0, 255])
-        rigidified.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
-        rigidified.addChild(all)
+        self.rigidified.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
+        self.rigidified.addChild(all)
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
         topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
@@ -97,21 +99,21 @@ class Cell(Sofa.Prefab):
         topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
 
         topCenterRestPosition.init()
-        deformable = self.addChild("DeformablePart")
-        deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
+        self.deformable = self.simulationNode.addChild(self.name.value + "DeformablePart")
+        self.deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
                              showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
-        deformable.addChild(all)
+        self.deformable.addChild(all)
 
         visual = all.addChild("Visual")
         visual.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
         visual.addObject("OglModel", src=visual.MeshTopology.linkpath)
         visual.addObject("IdentityMapping")
 
-        deformable.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
+        self.deformable.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
                              external_points=topCenterRestPosition.getMechanicalState().position.linkpath) # Spring on the top center of the cell
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
-                       input=[rigidified.getMechanicalState().linkpath,
-                              deformable.getMechanicalState().linkpath],
+                       input=[self.rigidified.getMechanicalState().linkpath,
+                              self.deformable.getMechanicalState().linkpath],
                        output=all.getMechanicalState().linkpath,
                        indexPairs=[[1, 0],
                                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]])
@@ -120,7 +122,7 @@ class Cell(Sofa.Prefab):
         """
         Adds a collision model, one point on the center top of the cell.
         """
-        collision = self.DeformablePart.addChild("Collision")
+        collision = self.deformable.addChild("Collision")
         collision.addObject("MeshTopology", position=[self.positions[0]])
         collision.addObject("MechanicalObject", position=[self.positions[0]],
                             showObject=True, showObjectScale=0.002, drawMode=2)
@@ -141,4 +143,4 @@ def createScene(rootnode):
     patch.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0.001, 0, 0, 0, 1]])
     patch.addObject("FixedProjectiveConstraint", indices=[0])
 
-    Cell(attachNode=patch, attachIndex=0, name="Cell")
+    Cell(simulationNode=simulation, attachNode=patch, attachIndex=0, name="Cell")
