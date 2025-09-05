@@ -5,26 +5,23 @@ class Cell(Sofa.Prefab):
     """
         Modeling of a cell sensor. Units are m, kg
     """
+    sideSize: float=0.01
+    centerThickness: float=0.002
+    stiffness: float=1e2
+    totalMass: float=0.001
 
     def __init__(self, 
                  name: str,
                  attachNode: Sofa.Core.Node,
-                 attachIndex: int=0,
-                 sideSize: float=0.01, 
-                 centerThickness: float=0.002,
-                 stiffness: float=1e2,
-                 totalMass: float=0.001):
+                 attachIndex: int=0
+                 ):
         Sofa.Prefab.__init__(self)
 
         self.name = name
         self.attachNode = attachNode
         self.attachIndex = attachIndex
 
-        self.sideSize = sideSize
-        self.origin = attachNode.getMechanicalState().position.value[self.attachIndex][0:3]
-        self.centerThickness = centerThickness
-        self.stiffness = stiffness
-        self.totalMass = totalMass
+        self.origin = [0., 0., 0.]
 
         attachNode.parents[0].addChild(self)
         
@@ -45,6 +42,7 @@ class Cell(Sofa.Prefab):
         settings.addObject('RequiredPlugin', name='Sofa.Component.Constraint.Projective') # Needed to use components [FixedProjectiveConstraint]  
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mapping.NonLinear') # Needed to use components [RigidMapping]  
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mass') # Needed to use components [UniformMass]  
+        settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]
 
     def __addTopology(self):
         """
@@ -89,25 +87,28 @@ class Cell(Sofa.Prefab):
 
         rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
         rigidified.addObject("MechanicalObject", position=[self.positions[1:]],
-                             showObject=True, showObjectScale=5e1, drawMode=0, showColor=[255, 0, 0, 255])
+                             showObject=False, showObjectScale=5e1, drawMode=0, showColor=[255, 0, 0, 255])
         rigidified.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
         rigidified.addChild(all)
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
-        topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[-1]])
+        topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
+                                        showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
         topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
 
+        topCenterRestPosition.init()
         deformable = self.addChild("DeformablePart")
-        deformable.addObject("MechanicalObject", position=[self.positions[0]],
-                            showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
+        deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
+                             showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
         deformable.addChild(all)
 
         visual = all.addChild("Visual")
         visual.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
         visual.addObject("OglModel", src=visual.MeshTopology.linkpath)
         visual.addObject("IdentityMapping")
-        all.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
-                      external_points=topCenterRestPosition.getMechanicalState().position.linkpath) # Spring on the top center of the cell
+
+        deformable.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
+                             external_points=topCenterRestPosition.getMechanicalState().position.linkpath) # Spring on the top center of the cell
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
                        input=[rigidified.getMechanicalState().linkpath,
                               deformable.getMechanicalState().linkpath],
