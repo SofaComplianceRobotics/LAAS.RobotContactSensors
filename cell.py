@@ -25,9 +25,12 @@ class Cell(Sofa.Prefab):
 
         self.origin = [0., 0., 0.]
 
-        attachNode.parents[0].addChild(self)
+        assert simulationNode.getRoot().getChild("Settings") is not None
+        self.settings = simulationNode.getRoot().Settings
         
-        self.__addSettings()
+        if self.settings.getChild("Cell") is None:
+            self.settings.addChild("Cell")
+            self.__addSettings()
         self.positions = self.__addTopology()
         self.__addMechanical()
         self.__addCollision()
@@ -36,7 +39,7 @@ class Cell(Sofa.Prefab):
         """
         Node with the settings, like the required plugins
         """
-        settings = self.addChild("Settings")
+        settings = self.settings.Cell
         settings.addObject('RequiredPlugin', name='Sofa.Component.Collision.Geometry') # Needed to use components [PointCollisionModel]  
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mapping.Linear') # Needed to use components [IdentityMapping]  
         settings.addObject('RequiredPlugin', name='Sofa.Component.Topology.Container.Constant') # Needed to use components [MeshTopology] 
@@ -70,10 +73,6 @@ class Cell(Sofa.Prefab):
                         [0, 4, 5, 7],
                         [0, 5, 6, 7],
                         [0, 6, 1, 7],]
-        
-        topology = self.addChild("Topology")
-        topology.addObject("MeshTopology", position=positions, edges=self.edges, tetras=self.tetras, 
-                           drawTetrahedra=False)
 
         return positions
     
@@ -95,22 +94,23 @@ class Cell(Sofa.Prefab):
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
         topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
-                                        showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
+                                        showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
         topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
-
         topCenterRestPosition.init()
+        
         self.deformable = self.simulationNode.addChild(self.name.value + "DeformablePart")
         self.deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
-                             showObject=True, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
+                                    showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
         self.deformable.addChild(all)
 
         visual = all.addChild("Visual")
         visual.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
-        visual.addObject("OglModel", src=visual.MeshTopology.linkpath)
+        visual.addObject("OglModel", src=visual.MeshTopology.linkpath, color=[1, 0, 0, 1])
         visual.addObject("IdentityMapping")
 
         self.deformable.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
-                             external_points=topCenterRestPosition.getMechanicalState().position.linkpath) # Spring on the top center of the cell
+                                  external_points=[0],
+                                  external_rest_shape=topCenterRestPosition.getMechanicalState().linkpath) # Spring on the top center of the cell
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
                        input=[self.rigidified.getMechanicalState().linkpath,
                               self.deformable.getMechanicalState().linkpath],
@@ -125,7 +125,7 @@ class Cell(Sofa.Prefab):
         collision = self.deformable.addChild("Collision")
         collision.addObject("MeshTopology", position=[self.positions[0]])
         collision.addObject("MechanicalObject", position=[self.positions[0]],
-                            showObject=True, showObjectScale=0.002, drawMode=2)
+                            showObject=False, showObjectScale=0.002, drawMode=2)
         collision.addObject("PointCollisionModel")
         collision.addObject("BarycentricMapping", input_topology=collision.MeshTopology.linkpath)
 
@@ -139,8 +139,12 @@ def createScene(rootnode):
     addSolvers(simulation, rayleighStiffness=0.001)
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
-    patch = simulation.addChild("Patch")
-    patch.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0.001, 0, 0, 0, 1]])
-    patch.addObject("FixedProjectiveConstraint", indices=[0])
+    for i in range(3):
+        patch = simulation.addChild("Patch"+str(i))
+        patch.addObject("MechanicalObject", template="Rigid3", position=[[[0, 0, 0.01, 0, 0, 0, 1],
+                                                                          [0, -0.01, 0, 0, 0.707, 0, 0.707],
+                                                                          [0, 0, 0, 0, 0, 0, 1]][i]],
+                        showObject=True, showObjectScale=0.005)
+        patch.addObject("FixedProjectiveConstraint", indices=[0])
 
-    Cell(simulationNode=simulation, attachNode=patch, attachIndex=0, name="Cell")
+        Cell(simulationNode=simulation, attachNode=patch, attachIndex=0, name="Patch"+str(i)+"Cell")

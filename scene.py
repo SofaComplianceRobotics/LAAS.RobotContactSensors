@@ -5,6 +5,7 @@ def createScene(rootnode):
     from patch import Patch
     import Sofa.ImGui as MyGui
     from math import pi
+    from splib3.numerics import Quat
     from modules.robotconfigurations import talos_ctrl_joint_infos_grasp as talosInitConfiguration
 
     settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=False, friction=0)
@@ -36,6 +37,14 @@ def createScene(rootnode):
     # Thus we have to hard code the initial configuration in the first call of URDFModelLoader
     robot.getMechanicalState().position.value = positions
 
-    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=30, name="Patch", cellGrid=[5, 5])
+    # Add a patch
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=30, name="PatchRightArm", cellGrid=[4, 4], 
+          origin=[0.00487 + 0.01, -0.297262 + 0.06, -0.111945 + 0.08, 0.5233419, -0.5233419, -0.4753564, -0.4753564])
+    
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=19, name="PatchLeftArm", cellGrid=[4, 4], 
+          origin=[-0.00487 + 0.01, 0.297262 - 0.06, 0.111945 - 0.145, 0.5233419, 0.5233419, -0.4753564, 0.4753564])
+
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=14, name="PatchTorso", cellGrid=[3, 24], 
+          origin=[0.08, -0.1, 0.2, 0.0, 0.707, 0.0, 0.707])
 
     return

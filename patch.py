@@ -1,7 +1,8 @@
 import Sofa 
 from cell import Cell
 import numpy as np
-from math import sqrt
+from math import sqrt, pi, cos, sin
+from splib3.numerics import Quat, Vec3
 
 class Patch(Sofa.Prefab):
 
@@ -33,10 +34,15 @@ class Patch(Sofa.Prefab):
         stepy = Cell.sideSize * sqrt(3)/2
         for i in range(self.cellGrid[0]):
             for j in range(self.cellGrid[1]):
-                p = list(self.origin)
-                p[0] += stepx * i + 1.5 * Cell.sideSize * (j % 2) 
-                p[1] += stepy * j
-                positions.append(p)
+                x = stepx * i + 1.5 * Cell.sideSize * (j % 2) 
+                y = stepy * j
+                z = 0
+                q = Quat(self.origin[3:7])
+                v = Vec3([x, y, z])
+                v = v.rotateFromQuat(q)
+                for k in range(3):
+                    v[k] += self.origin[k]
+                positions.append(list(v)+list(q))
 
         self.addObject("MechanicalObject", template="Rigid3", position=positions,
                        showObject=False, showObjectScale=0.01, drawMode=2)
@@ -45,10 +51,11 @@ class Patch(Sofa.Prefab):
     def __addCells(self):
         for i in range(self.cellGrid[0]):
             for j in range(self.cellGrid[1]):
-                cell = Cell(name=self.name.value + "Cell"+str(i)+str(j),
+                index = i*self.cellGrid[1] + j
+                cell = Cell(name=self.name.value + "Cell-"+str(index + 1),
                             simulationNode=self.simulationNode,
                             attachNode=self,
-                            attachIndex=i*self.cellGrid[1]+j,
+                            attachIndex=index,
                             )
 
     
@@ -63,9 +70,12 @@ def createScene(rootnode):
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
     robot = simulation.addChild("Robot")
-    robot.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0, 0, 0, 0, 1]],
-                    showObject=True, showObjectScale=0.01, drawMode=2)
+    robot.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0, 0, 0, 0, 1]])
     robot.addObject("FixedProjectiveConstraint", indices=[0])
 
-    Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch1", cellGrid=[5, 5], origin=[0, 0.1, 0, 0, 0.707, 0, 0.707])
-    Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch2", cellGrid=[5, 5], origin=[0, 0, 0, 0, 0, 0, 1])
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch1", cellGrid=[5, 5], origin=[0, 0.1, 0, 0, 0.707, 0, 0.707])
+    patch.getMechanicalState().showObject=False
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch2", cellGrid=[5, 5], origin=[0, 0, 0, cos(pi/6), 0, 0, sin(pi/6)])
+    patch.getMechanicalState().showObject=False
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch3", cellGrid=[2, 5], origin=[-0.2, 0.1, 0, 0, 0, 0, 1])
+    patch.getMechanicalState().showObject=False
