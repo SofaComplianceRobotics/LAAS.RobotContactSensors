@@ -1,5 +1,5 @@
 import Sofa 
-from cell import Cell
+from .cell import Cell
 import numpy as np
 from math import sqrt, pi, cos, sin
 from splib3.numerics import Quat, Vec3

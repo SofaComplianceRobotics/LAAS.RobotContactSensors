@@ -1,8 +1,8 @@
 def createScene(rootnode):
     import numpy as np
     from modules.header import addHeader, addSolvers
-    from robot import TalosHumanoidRobot
-    from patch import Patch
+    from modules.robot import TalosHumanoidRobot
+    from modules.patch import Patch
     import Sofa.ImGui as MyGui
     from math import pi
     from splib3.numerics import Quat
