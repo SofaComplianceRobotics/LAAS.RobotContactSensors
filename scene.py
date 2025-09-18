@@ -38,13 +38,13 @@ def createScene(rootnode):
     robot.getMechanicalState().position.value = positions
 
     # Add a patch
-    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=30, name="PatchRightArm", cellGrid=[4, 4], 
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=13, name="PatchRightArm", cellGrid=[4, 4], 
           origin=[0.00487 + 0.01, -0.297262 + 0.06, -0.111945 + 0.08, 0.5233419, -0.5233419, -0.4753564, -0.4753564])
     
-    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=19, name="PatchLeftArm", cellGrid=[4, 4], 
-          origin=[-0.00487 + 0.01, 0.297262 - 0.06, 0.111945 - 0.145, 0.5233419, 0.5233419, -0.4753564, 0.4753564])
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=7, name="PatchLeftArm", cellGrid=[4, 4], 
+          origin=[-0.00487, 0.297262 - 0.06, 0.111945 - 0.145, 0.5233419, 0.5233419, -0.4753564, 0.4753564])
 
-    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=14, name="PatchTorso", cellGrid=[3, 24], 
+    Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=2, name="PatchTorso", cellGrid=[3, 24], 
           origin=[0.08, -0.1, 0.2, 0.0, 0.707, 0.0, 0.707])
 
     return

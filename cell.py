@@ -1,5 +1,6 @@
 import Sofa
-from math import pi, cos, sin
+from math import pi, cos, sin, floor
+import numpy as np
 
 class Cell(Sofa.Prefab):
     """
@@ -11,10 +12,11 @@ class Cell(Sofa.Prefab):
     totalMass: float=0.001
 
     def __init__(self, 
-                 name: str,
                  simulationNode: Sofa.Core.Node,
                  attachNode: Sofa.Core.Node,
+                 name: str="Cell",
                  attachIndex: int=0,
+                 addToCell=None
                  ):
         Sofa.Prefab.__init__(self)
 
@@ -23,17 +25,18 @@ class Cell(Sofa.Prefab):
         self.attachNode = attachNode
         self.attachIndex = attachIndex
 
-        self.origin = [0., 0., 0.]
-
         assert simulationNode.getRoot().getChild("Settings") is not None
         self.settings = simulationNode.getRoot().Settings
-        
         if self.settings.getChild("Cell") is None:
             self.settings.addChild("Cell")
             self.__addSettings()
+
         self.positions = self.__addTopology()
-        self.__addMechanical()
-        self.__addCollision()
+        if addToCell is None:
+            self.__addMechanical()
+            self.__addCollision()
+        else:
+            self.__addToCell(addToCell)
 
     def __addSettings(self):
         """
@@ -54,7 +57,7 @@ class Cell(Sofa.Prefab):
         Topology of the cell, 8 points, 6 tetras.
         """
         s = self.sideSize
-        o = self.origin 
+        o = [0., 0., 0.]
 
         positions = [[o[0], o[1], o[2] + self.centerThickness], # First point is the center up
                      [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
@@ -81,7 +84,7 @@ class Cell(Sofa.Prefab):
         Adds cell mechanical, deformable and rigid parts.
         """
         all = Sofa.Core.Node("All")
-        all.addObject("MeshTopology", position=self.positions)
+        all.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
         all.addObject("MechanicalObject", position=self.positions,
                        showObject=False, showObjectScale=5e-4, drawMode=2)
         all.addObject("UniformMass", totalMass=self.totalMass)
@@ -89,7 +92,7 @@ class Cell(Sofa.Prefab):
         self.rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
         self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]],
                              showObject=False, showObjectScale=5e1, drawMode=0, showColor=[255, 0, 0, 255])
-        self.rigidified.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
+        self.rigidified.addObject("RigidMapping", rigidIndexPerPoint=[self.attachIndex]*7, globalToLocalCoords=False)
         self.rigidified.addChild(all)
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
@@ -104,11 +107,11 @@ class Cell(Sofa.Prefab):
         self.deformable.addChild(all)
 
         visual = all.addChild("Visual")
-        visual.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
-        visual.addObject("OglModel", src=visual.MeshTopology.linkpath, color=[1, 0, 0, 1])
+        visual.addObject("OglModel", src=all.MeshTopology.linkpath, color=[1, 1, 1, 0.5])
         visual.addObject("IdentityMapping")
 
-        self.deformable.addObject("RestShapeSpringsForceField", points=[0], stiffness=self.stiffness,
+        self.deformable.addObject("RestShapeSpringsForceField", name="rsff0",
+                                  points=[0], stiffness=self.stiffness,
                                   external_points=[0],
                                   external_rest_shape=topCenterRestPosition.getMechanicalState().linkpath) # Spring on the top center of the cell
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
@@ -118,17 +121,58 @@ class Cell(Sofa.Prefab):
                        indexPairs=[[1, 0],
                                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]])
         
+    def __addToCell(self, cell):
+
+        all = cell.deformable.All
+        offset = len(all.getMechanicalState().position.value)
+        offsetD = floor(offset / 8)
+        offsetR = offset - offsetD
+
+        offset = len(all.getMechanicalState().position.value)
+        for e in self.edges:
+            for i in range(2):
+                e[i] += offset
+        for t in self.tetras:
+            for i in range(4):
+                t[i] += offset
+
+        all.MeshTopology.position.value = np.append(all.MeshTopology.position.value, self.positions, axis=0)
+        all.MeshTopology.edges.value = list(np.append(all.MeshTopology.edges.value, self.edges, axis=0))
+        all.MeshTopology.tetras.value = list(np.append(all.MeshTopology.tetras.value, self.tetras, axis=0))
+        all.getMechanicalState().position.value = np.append(all.getMechanicalState().position.value, 
+                                                            self.positions, axis=0)
+
+        cell.rigidified.getMechanicalState().position.value = np.append(cell.rigidified.getMechanicalState().position.value, 
+                                                                        self.positions[1:], axis=0)
+        rigidIndexPerPoint = np.append(cell.rigidified.RigidMapping.rigidIndexPerPoint.value,
+                                       [self.attachIndex]*7)
+        cell.rigidified.RigidMapping.rigidIndexPerPoint.value = list(rigidIndexPerPoint)
+
+        topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition" + str(offsetR))
+        topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
+                                        showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
+        topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
+        topCenterRestPosition.init()
+
+        cell.deformable.getMechanicalState().position.value = np.append(cell.deformable.getMechanicalState().position.value,
+                                                                        topCenterRestPosition.getMechanicalState().position.value, axis=0)
+
+        cell.deformable.addObject("RestShapeSpringsForceField", 
+                                  name = "rsff" + str(offsetD),
+                                  points=[offsetD], stiffness=self.stiffness,
+                                  external_points=[0],
+                                  external_rest_shape=topCenterRestPosition.getMechanicalState().linkpath) # Spring on the top center of the cell
+        
+        indexPairs = list(all.SubsetMultiMapping.indexPairs.value) + [1, offsetD,
+                                                                      0, offsetR, 0, offsetR+1, 0, offsetR+2, 0, offsetR+3, 0, offsetR+4, 0, offsetR+5, 0, offsetR+6]
+    
+        all.SubsetMultiMapping.indexPairs.value = indexPairs
+        
     def __addCollision(self):
         """
         Adds a collision model, one point on the center top of the cell.
         """
-        collision = self.deformable.addChild("Collision")
-        collision.addObject("MeshTopology", position=[self.positions[0]])
-        collision.addObject("MechanicalObject", position=[self.positions[0]],
-                            showObject=False, showObjectScale=0.002, drawMode=2)
-        collision.addObject("PointCollisionModel")
-        collision.addObject("BarycentricMapping", input_topology=collision.MeshTopology.linkpath)
-
+        self.deformable.addObject("PointCollisionModel")
         
 def createScene(rootnode):
 

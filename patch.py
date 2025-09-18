@@ -49,16 +49,22 @@ class Patch(Sofa.Prefab):
         self.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=True)
 
     def __addCells(self):
+        cell = None
         for i in range(self.cellGrid[0]):
             for j in range(self.cellGrid[1]):
                 index = i*self.cellGrid[1] + j
-                cell = Cell(name=self.name.value + "Cell-"+str(index + 1),
-                            simulationNode=self.simulationNode,
-                            attachNode=self,
-                            attachIndex=index,
-                            )
-
-    
+                if cell is None:
+                    cell = Cell(name=self.name.value + "Cells",
+                                simulationNode=self.simulationNode,
+                                attachNode=self,
+                                attachIndex=index,
+                                )
+                else:
+                    Cell(simulationNode=self.simulationNode,
+                         attachNode=self,
+                         attachIndex=index,
+                         addToCell=cell)
+                    
 
 def createScene(rootnode):
 
@@ -73,9 +79,12 @@ def createScene(rootnode):
     robot.addObject("MechanicalObject", template="Rigid3", position=[[0, 0, 0, 0, 0, 0, 1]])
     robot.addObject("FixedProjectiveConstraint", indices=[0])
 
-    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch1", cellGrid=[5, 5], origin=[0, 0.1, 0, 0, 0.707, 0, 0.707])
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch1", cellGrid=[5, 4], 
+                  origin=[0., 0.1, 0., 0., 0.707, 0., 0.707])
     patch.getMechanicalState().showObject=False
-    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch2", cellGrid=[5, 5], origin=[0, 0, 0, cos(pi/6), 0, 0, sin(pi/6)])
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch2", cellGrid=[5, 5], 
+                  origin=[0., 0., 0., cos(pi/6), 0., 0., sin(pi/6)])
     patch.getMechanicalState().showObject=False
-    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch3", cellGrid=[2, 5], origin=[-0.2, 0.1, 0, 0, 0, 0, 1])
+    patch = Patch(simulationNode=simulation, attachNode=robot, attachIndex=0, name="Patch3", cellGrid=[2, 5], 
+                  origin=[-0.2, 0.1, 0., 0., 0., 0., 1])
     patch.getMechanicalState().showObject=False
