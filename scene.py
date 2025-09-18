@@ -18,7 +18,7 @@ def createScene(rootnode):
     rootnode.gravity = [0., -9.81, 0.]
 
     # Robot
-    simulation.addChild(TalosHumanoidRobot())
+    simulation.addChild(TalosHumanoidRobot("data/talos_torso.urdf"))
     robot = simulation.TalosHumanoidRobot.Robot
 
     # Direct problem

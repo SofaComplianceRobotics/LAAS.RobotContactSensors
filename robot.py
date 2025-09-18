@@ -3,9 +3,10 @@ import numpy as np
 
 class TalosHumanoidRobot(Sofa.Prefab):
 
-    def __init__(self):
+    def __init__(self, urdf="data/talos.urdf"):
         Sofa.Prefab.__init__(self)
         self.name = 'TalosHumanoidRobot'
+        self.urdf = urdf
 
         # Add the robot model to the scene graph
         self.__addRobot()
@@ -21,7 +22,7 @@ class TalosHumanoidRobot(Sofa.Prefab):
         settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]  
 
         self.addObject('URDFModelLoader', 
-                        filename="data/talos.urdf", 
+                        filename=self.urdf, 
                         modelDirectory="data/meshes/", 
                         useFreeFlyerRootJoint=False, 
                         printLog=False, 
