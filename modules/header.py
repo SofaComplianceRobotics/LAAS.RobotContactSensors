@@ -3,6 +3,7 @@ def addHeader(rootnode,
               friction=0.6,
               withCollision=False, withConstraint=True):
 
+    # Units are in m, kg, s
     # RequiredPlugins
     settings = rootnode.addChild('Settings')
     settings.addObject('RequiredPlugin', name="external",
@@ -41,7 +42,7 @@ def addHeader(rootnode,
                            response='FrictionContactConstraint')
         rootnode.addObject('ParallelBruteForceBroadPhase')
         rootnode.addObject('ParallelBVHNarrowPhase')
-        rootnode.addObject('LocalMinDistance', alarmDistance=5, contactDistance=0.5)
+        rootnode.addObject('LocalMinDistance', alarmDistance=0.005, contactDistance=0.001)
 
     # Constraint header
     if withConstraint:

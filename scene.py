@@ -3,20 +3,18 @@ def createScene(rootnode):
     from modules.header import addHeader, addSolvers
     from modules.robot import TalosHumanoidRobot
     from modules.patch import Patch
+    from modules.ball import Ball
     import Sofa.ImGui as MyGui
     from math import pi
     from splib3.numerics import Quat
     from modules.robotconfigurations import talos_ctrl_joint_infos_grasp as talosInitConfiguration
 
-    settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=False, friction=0)
+    settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=True)
 
     addSolvers(simulation, rayleighStiffness=0.001)
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
     # Units are in m, kg, s
-    rootnode.dt = 0.01
-    rootnode.gravity = [0., -9.81, 0.]
-
     # Robot
     simulation.addChild(TalosHumanoidRobot("data/talos_torso.urdf"))
     robot = simulation.TalosHumanoidRobot.Robot
@@ -46,5 +44,7 @@ def createScene(rootnode):
 
     Patch(simulationNode=simulation, attachNode=robot.Model, attachIndex=2, name="PatchTorso", cellGrid=[3, 24], 
           origin=[0.08, -0.1, 0.2, 0.0, 0.707, 0.0, 0.707])
+    
+    Ball(simulation, position=[0.3, 0, 0.3])
 
     return

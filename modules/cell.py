@@ -25,6 +25,11 @@ class Cell(Sofa.Prefab):
         self.attachNode = attachNode
         self.attachIndex = attachIndex
 
+        self.colorActive = [0, 1, 0, 1]
+        self.colorInactive = [1, 1, 1, 1]
+        self.drawMode = 1
+        self.drawScale = 0.002
+
         assert simulationNode.getRoot().getChild("Settings") is not None
         self.settings = simulationNode.getRoot().Settings
         if self.settings.getChild("Cell") is None:
@@ -34,6 +39,7 @@ class Cell(Sofa.Prefab):
         self.positions = self.__addTopology()
         if addToCell is None:
             self.__addMechanical()
+            self.__addVisual()
             self.__addCollision()
         else:
             self.__addToCell(addToCell)
@@ -78,38 +84,34 @@ class Cell(Sofa.Prefab):
                         [0, 6, 1, 7],]
 
         return positions
-    
+
     def __addMechanical(self):
         """
         Adds cell mechanical, deformable and rigid parts.
         """
         all = Sofa.Core.Node("All")
+        self.all = all
         all.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
-        all.addObject("MechanicalObject", position=self.positions,
-                       showObject=False, showObjectScale=5e-4, drawMode=2)
+        all.addObject("MechanicalObject", position=self.positions)
         all.addObject("UniformMass", totalMass=self.totalMass)
 
         self.rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
-        self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]],
-                             showObject=False, showObjectScale=5e1, drawMode=0, showColor=[255, 0, 0, 255])
+        self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]])
         self.rigidified.addObject("RigidMapping", rigidIndexPerPoint=[self.attachIndex]*7, globalToLocalCoords=False)
         self.rigidified.addChild(all)
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
         topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
-                                        showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
+                                        showObject=True, showObjectScale=self.drawScale, drawMode=self.drawMode, showColor=self.colorActive)
         topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
         topCenterRestPosition.init()
         
         self.deformable = self.simulationNode.addChild(self.name.value + "DeformablePart")
         self.deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
-                                    showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 0, 255, 255])
+                                    showObject=True, showObjectScale=self.drawScale*1.1, drawMode=self.drawMode, showColor=self.colorInactive)
         self.deformable.addChild(all)
 
-        visual = all.addChild("Visual")
-        visual.addObject("OglModel", src=all.MeshTopology.linkpath, color=[1, 1, 1, 0.5])
-        visual.addObject("IdentityMapping")
-
+        self.deformable.addObject("VisualStyle", displayFlags=["showBehavior"])
         self.deformable.addObject("RestShapeSpringsForceField", name="rsff0",
                                   points=[0], stiffness=self.stiffness,
                                   external_points=[0],
@@ -123,7 +125,7 @@ class Cell(Sofa.Prefab):
         
     def __addToCell(self, cell):
 
-        all = cell.deformable.All
+        all = cell.all
         offset = len(all.getMechanicalState().position.value)
         offsetD = floor(offset / 8)
         offsetR = offset - offsetD
@@ -150,7 +152,7 @@ class Cell(Sofa.Prefab):
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition" + str(offsetR))
         topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
-                                        showObject=False, showObjectScale=5e1, drawMode=0, showColor=[0, 255, 0, 255])
+                                        showObject=True, showObjectScale=self.drawScale, drawMode=self.drawMode, showColor=self.colorActive)
         topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
         topCenterRestPosition.init()
 
@@ -168,6 +170,14 @@ class Cell(Sofa.Prefab):
     
         all.SubsetMultiMapping.indexPairs.value = indexPairs
         
+    def __addVisual(self):
+        """
+        Adds a visual model
+        """
+        visual = self.all.addChild("VisualWhite")
+        visual.addObject("OglModel", src=self.all.MeshTopology.linkpath, color=[1, 1, 1, 0.5])
+        visual.addObject("IdentityMapping")
+
     def __addCollision(self):
         """
         Adds a collision model, one point on the center top of the cell.
