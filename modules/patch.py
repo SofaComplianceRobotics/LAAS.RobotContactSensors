@@ -11,7 +11,8 @@ class Patch(Sofa.Prefab):
                  simulationNode: Sofa.Core.Node,
                  attachNode: Sofa.Core.Node,
                  attachIndex: int=0,
-                 cellGrid: tuple[int]=[1, 1],
+                 cellsGrid: tuple[int]=[1, 1],
+                 cellsPositions: list[list[float]] = None,
                  origin: list[float]=[0, 0, 0, 0, 0, 0, 1]):
         
         Sofa.Prefab.__init__(self)
@@ -20,7 +21,8 @@ class Patch(Sofa.Prefab):
         self.simulationNode = simulationNode
         self.attachNode = attachNode
         self.attachIndex = attachIndex
-        self.cellGrid = cellGrid
+        self.cellsGrid = cellsGrid
+        self.cellsPositions = cellsPositions
         self.origin = origin
 
         self.attachNode.addChild(self)
@@ -29,20 +31,28 @@ class Patch(Sofa.Prefab):
         self.__addCells()
 
     def __addMechanical(self):
-        positions = []
-        stepx = Cell.sideSize * 3
-        stepy = Cell.sideSize * sqrt(3)/2
-        for i in range(self.cellGrid[0]):
-            for j in range(self.cellGrid[1]):
-                x = stepx * i + 1.5 * Cell.sideSize * (j % 2) 
-                y = stepy * j
-                z = 0
-                q = Quat(self.origin[3:7])
-                v = Vec3([x, y, z])
-                v = v.rotateFromQuat(q)
+        positions = self.cellsPositions
+        if positions is None:
+            positions = []
+            stepx = Cell.sideSize * 3
+            stepy = Cell.sideSize * sqrt(3)/2
+            for i in range(self.cellsGrid[0]):
+                for j in range(self.cellsGrid[1]):
+                    x = stepx * i + 1.5 * Cell.sideSize * (j % 2) 
+                    y = stepy * j
+                    z = 0
+                    q = Quat(self.origin[3:7])
+                    v = Vec3([x, y, z])
+                    v = v.rotateFromQuat(q)
+                    for k in range(3):
+                        v[k] += self.origin[k]
+                    positions.append(list(v)+list(q))
+        else:
+            for i in range(len(positions)):
+                v = Vec3(positions[i][0:3])
                 for k in range(3):
                     v[k] += self.origin[k]
-                positions.append(list(v)+list(q))
+                positions[i][0:3] = list(v)
 
         self.addObject("MechanicalObject", template="Rigid3", position=positions,
                        showObject=False, showObjectScale=0.01, drawMode=2)
@@ -50,9 +60,24 @@ class Patch(Sofa.Prefab):
 
     def __addCells(self):
         cell = None
-        for i in range(self.cellGrid[0]):
-            for j in range(self.cellGrid[1]):
-                index = i*self.cellGrid[1] + j
+        if self.cellsPositions is not None:
+            for index in range(len(self.cellsPositions)):
+                if cell is None:
+                    cell = Cell(name=self.name.value + "Cells",
+                                simulationNode=self.simulationNode,
+                                attachNode=self,
+                                attachIndex=index,
+                                )
+                else:
+                    Cell(simulationNode=self.simulationNode,
+                         attachNode=self,
+                         attachIndex=index,
+                         addToCell=cell)
+            return
+        
+        for i in range(self.cellsGrid[0]):
+            for j in range(self.cellsGrid[1]):
+                index = i*self.cellsGrid[1] + j
                 if cell is None:
                     cell = Cell(name=self.name.value + "Cells",
                                 simulationNode=self.simulationNode,

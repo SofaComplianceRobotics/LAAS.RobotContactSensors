@@ -24,12 +24,12 @@ class Ball(Sofa.Prefab):
         settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]  
 
     def __addMechanical(self):
-        self.addObject("MeshOBJLoader", filename="mesh/ball.obj", triangulate=True, scale=0.17, translation=self.translation)
+        self.addObject("MeshOBJLoader", filename="mesh/ball.obj", triangulate=True, scale=0.15, translation=self.translation)
         self.addObject("MeshTopology", src=self.MeshOBJLoader.linkpath)
         self.addObject("MechanicalObject", template="Rigid3")
         self.addObject("UniformMass", totalMass=0.050) # 50g
         self.addObject("TriangularBendingFEMForceField", 
-                       youngModulus=3e4,
+                       youngModulus=3e3,
                        poissonRatio=0.4,
                        thickness=0.002) # 2mm
 

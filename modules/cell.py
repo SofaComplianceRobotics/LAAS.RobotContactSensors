@@ -8,7 +8,7 @@ class Cell(Sofa.Prefab):
     """
     sideSize: float=0.01
     centerThickness: float=0.002
-    stiffness: float=1e2
+    stiffness: float=1e3
     totalMass: float=0.001
 
     def __init__(self, 
