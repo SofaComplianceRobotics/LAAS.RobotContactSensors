@@ -8,7 +8,7 @@ class Cell(Sofa.Prefab):
     """
     sideSize: float=0.01
     centerThickness: float=0.002
-    stiffness: float=1e3
+    stiffness: float=5e2
     totalMass: float=0.001
 
     def __init__(self, 
@@ -25,10 +25,10 @@ class Cell(Sofa.Prefab):
         self.attachNode = attachNode
         self.attachIndex = attachIndex
 
-        self.colorActive = [0, 1, 0, 1]
+        self.colorActive = [1, 0, 0, 1]
         self.colorInactive = [1, 1, 1, 1]
         self.drawMode = 1
-        self.drawScale = 0.002
+        self.drawScale = 0.003
 
         assert simulationNode.getRoot().getChild("Settings") is not None
         self.settings = simulationNode.getRoot().Settings

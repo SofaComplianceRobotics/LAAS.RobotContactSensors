@@ -2,13 +2,15 @@ import Sofa
 
 class Ball(Sofa.Prefab):
 
-    def __init__(self, attachNode, position=[0, 0, 0]):
+    def __init__(self, attachNode, position=[0, 0, 0], model="volume", color=[0.1, 0.1, 1, 0.3]):
         Sofa.Prefab.__init__(self)
         attachNode.addChild(self)
         self.translation = position
+        self.scale = 0.16
+        self.color = color
 
         self.__addSettings()
-        self.__addMechanical()
+        self.__addMechanical(model)
         self.__addVisual()
         self.__addCollision()
 
@@ -23,29 +25,41 @@ class Ball(Sofa.Prefab):
         settings.addObject('RequiredPlugin', name='Sofa.Component.Mapping.Linear') # Needed to use components [IdentityMapping]  
         settings.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel]  
 
-    def __addMechanical(self):
-        self.addObject("MeshOBJLoader", filename="mesh/ball.obj", triangulate=True, scale=0.15, translation=self.translation)
-        self.addObject("MeshTopology", src=self.MeshOBJLoader.linkpath)
-        self.addObject("MechanicalObject", template="Rigid3")
+    def __addMechanical(self, model):
+        if model == "volume":
+            s = 1 * self.scale
+            self.addObject("MeshVTKLoader", name="loader", 
+                          filename="data/meshes/ball.vtk", scale=self.scale, translation=self.translation)
+        else:
+            self.addObject("MeshOBJLoader", 
+                            name="loader", 
+                            filename="mesh/ball.obj", 
+                            triangulate=True, scale=self.scale, translation=self.translation)
+        self.addObject("MeshTopology", src=self.loader.linkpath)
+        self.addObject("MechanicalObject", template="Vec3" if model == "volume" else "Rigid3")
         self.addObject("UniformMass", totalMass=0.050) # 50g
-        self.addObject("TriangularBendingFEMForceField", 
-                       youngModulus=3e3,
-                       poissonRatio=0.4,
-                       thickness=0.002) # 2mm
+        self.addObject("TetrahedronFEMForceField" if model == "volume" else "TriangularBendingFEMForceField", 
+                        youngModulus=3e3,
+                        poissonRatio=0.4) 
+        
+        if model != "volume":
+            self.HexahedronFEMForceField.thickness=0.002 # 2mm
 
     def __addVisual(self):
         visual = self.addChild("Visual")
-        visual.addObject("OglModel", src=self.MeshOBJLoader.linkpath, color=[0.1, 0.1, 1, 0.3])
-        visual.addObject("IdentityMapping")
+        visual.addObject("MeshOBJLoader", filename="mesh/ball.obj", 
+                         triangulate=True, scale=self.scale, translation=self.translation)
+        visual.addObject("OglModel", src=visual.MeshOBJLoader.linkpath, color=self.color)
+        visual.addObject("BarycentricMapping")
 
     def __addCollision(self):
         collision = self.addChild("Collision")
-        collision.addObject("MeshTopology", src=self.MeshTopology.linkpath)
+        collision.addObject("MeshTopology", src=self.Visual.MeshOBJLoader.linkpath)
         collision.addObject("MechanicalObject")
         collision.addObject("PointCollisionModel")
         collision.addObject("LineCollisionModel")
         collision.addObject("TriangleCollisionModel")
-        collision.addObject("IdentityMapping")
+        collision.addObject("BarycentricMapping")
 
 def createScene(rootnode):
     Ball(rootnode)

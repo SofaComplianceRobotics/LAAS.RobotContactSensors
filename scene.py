@@ -9,13 +9,14 @@ def createScene(rootnode):
     from modules.patch import Patch
     from modules.ball import Ball
     import Sofa.ImGui as MyGui
-    from math import pi
+    from math import pi, sin
     from splib3.numerics import Quat
+    from splib3.animation import AnimationManager, animate
     from modules.robotconfigurations import talos_ctrl_joint_infos_grasp as talosInitConfiguration
 
     settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=True)
 
-    addSolvers(simulation, rayleighStiffness=0.001)
+    addSolvers(simulation, rayleighStiffness=0)
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
     # Units are in m, kg, s
@@ -31,7 +32,7 @@ def createScene(rootnode):
         jointName = names[i+1].name.value
         value = 0 if jointName not in talosInitConfiguration else talosInitConfiguration[jointName].pos_desired
         positions[i] = value
-        joint = robot.addObject('JointConstraint', template='Vec1', name='joint' + str(i), index=i, 
+        joint = robot.addObject('JointConstraint', template='Vec1', name=jointName, index=i, 
                                 valueType="angle", 
                                 value=value
                                 )
@@ -103,6 +104,23 @@ def createScene(rootnode):
                   origin=patchOrigins[patchIndex])
             patchIndex += 1
     
-    Ball(simulation, position=[0.3, 0, 0.3])
+    ball = Ball(simulation, position=[0.25, 0, 0.3], color=[0.1, 0.1, 1, 0.3])
+    ball.addObject("VisualStyle", displayFlags=["showVisual", "showForceFields", "showWireframe"])
+
+    # Animation
+    rootnode.addObject(AnimationManager(rootnode))
+    def animation(target, initialValue, factor, direction, startTime=0.):
+        target.value = initialValue + sin(factor * pi) * 0.2 * direction
+
+    animate(animation, {'target': robot.arm_right_3_joint.value, 
+                        'initialValue':robot.arm_right_3_joint.value.value,
+                        'startTime':0.5,
+                        'direction':1}, 
+                        duration=1., mode='loop')
+    animate(animation, {'target': robot.arm_left_3_joint.value, 
+                        'initialValue':robot.arm_left_3_joint.value.value,
+                        'startTime':0.5,
+                        'direction':-1}, 
+                        duration=1., mode='loop')
 
     return
