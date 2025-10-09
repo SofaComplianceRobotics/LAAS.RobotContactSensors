@@ -35,7 +35,7 @@ class TalosHumanoidRobot(Sofa.Prefab):
                                  )
         robot = self.getChild("Robot")
         mechanical = robot.Model.getMechanicalState()
-        mechanical.showObject = True
+        mechanical.showObject = False
         mechanical.showObjectScale = 0.01
         mechanical.drawMode = 0
     

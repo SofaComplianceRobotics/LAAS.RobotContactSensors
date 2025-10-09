@@ -1,5 +1,5 @@
 def addHeader(rootnode,
-              inverse=False, multithreading=True,
+              inverse=False, multithreading=False,
               friction=0.6,
               withCollision=False, withConstraint=True):
 

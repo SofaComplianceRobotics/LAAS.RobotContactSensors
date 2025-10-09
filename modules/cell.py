@@ -97,13 +97,17 @@ class Cell(Sofa.Prefab):
 
         self.rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
         self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]])
-        self.rigidified.addObject("RigidMapping", rigidIndexPerPoint=[self.attachIndex]*7, globalToLocalCoords=False)
+        self.rigidified.addObject("RigidMapping", rigidIndexPerPoint=[self.attachIndex]*7, globalToLocalCoords=False,
+                                    mapForces=False,
+                                    mapMatrices=False,)
         self.rigidified.addChild(all)
 
         topCenterRestPosition = self.attachNode.addChild(self.name.value + "TopCenterRestPosition")
         topCenterRestPosition.addObject("MechanicalObject", position=[self.positions[0]],
                                         showObject=True, showObjectScale=self.drawScale, drawMode=self.drawMode, showColor=self.colorActive)
-        topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False)
+        topCenterRestPosition.addObject("RigidMapping", index=self.attachIndex, globalToLocalCoords=False,
+                                        mapForces=False,
+                                        mapMatrices=False,)
         topCenterRestPosition.init()
         
         self.deformable = self.simulationNode.addChild(self.name.value + "DeformablePart")
@@ -117,6 +121,8 @@ class Cell(Sofa.Prefab):
                                   external_points=[0],
                                   external_rest_shape=topCenterRestPosition.getMechanicalState().linkpath) # Spring on the top center of the cell
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
+                      mapForces=False,
+                      mapMatrices=False,
                        input=[self.rigidified.getMechanicalState().linkpath,
                               self.deformable.getMechanicalState().linkpath],
                        output=all.getMechanicalState().linkpath,
@@ -182,7 +188,7 @@ class Cell(Sofa.Prefab):
         """
         Adds a collision model, one point on the center top of the cell.
         """
-        self.deformable.addObject("PointCollisionModel")
+        self.deformable.addObject("PointCollisionModel", group=1)
         
 def createScene(rootnode):
 

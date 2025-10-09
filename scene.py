@@ -8,6 +8,7 @@ def createScene(rootnode):
     from modules.robot import TalosHumanoidRobot
     from modules.patch import Patch
     from modules.ball import Ball
+    from modules.cementbag import CementBag
     import Sofa.ImGui as MyGui
     from math import pi, sin
     from splib3.numerics import Quat
@@ -103,6 +104,15 @@ def createScene(rootnode):
                   cellsPositions=cellsPositions, 
                   origin=patchOrigins[patchIndex])
             patchIndex += 1
+
+    # # Cement bag
+    # simulation.EulerImplicitSolver.rayleighStiffness.value = 0.03
+    # rootnode.dt.value = 0.005
+    # rootnode.gravity.value = [0, 0, -9.81]
+    # robot.arm_right_5_joint.value = -1.58
+    # robot.arm_left_5_joint.value = 1.58
+    # bag = CementBag(simulation, position=[1.7, 0, 0.2])
+    # bag.getMechanicalState().velocity.value = [[-2.5, 0, 2.7] for i in range(bag.getMechanicalState().size.value)]
     
     ball = Ball(simulation, position=[0.25, 0, 0.3], color=[0.1, 0.1, 1, 0.3])
     ball.addObject("VisualStyle", displayFlags=["showVisual", "showForceFields", "showWireframe"])
