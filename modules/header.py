@@ -52,7 +52,7 @@ def addHeader(rootnode,
             rootnode.addObject('QPInverseProblemSolver', name='ConstraintSolver', tolerance=1e-8, maxIterations=500,
                                multithreading=multithreading, responseFriction=friction, allowSliding=False, epsilon=0.01)
         else:
-            rootnode.addObject('GenericConstraintSolver', name='ConstraintSolver', tolerance=1e-8, maxIterations=500,
+            rootnode.addObject('ProjectedGaussSeidelConstraintSolver', name='ConstraintSolver', tolerance=1e-8, maxIterations=500,
                                multithreading=multithreading)
     else:
         rootnode.addObject('DefaultAnimationLoop')
