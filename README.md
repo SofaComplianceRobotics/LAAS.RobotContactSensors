@@ -19,7 +19,7 @@ The implementation and repository are organized as follows:
 
     The detection and resolution of contact are expensive operations. To optimize the simulation, we propose two strategies for the contacts:
     1. **Uncoupled contact forces**: This is the preferred method when simulating a large number of sensors. The contact forces are only detected on the center of each cell, allowing the deformable part of the cell to deform when in contact with an obstable. This method is computationally efficient but may lead to interpenetration of the robot with the environment. Plus, the contact forces are not transmitted to the robot. 
-    2. **Coupled contact forces**: The contact forces are detected on all the voxels of each sensor, allowing for a transmission of the contact forces to the robot. This method is more accurate but also computationally more expensive.  
+    2. **Coupled contact forces**: The contact forces are detected on all the voxels of each sensor, allowing for a transmission of the contact forces to the robot. This method is more accurate but also computationally more expensive. In the file cell.py, uncomment the line 214 to enable the coupled contact forces. 
     
     The file also contains an example of scene with only the sensors. You can run it by executing `runSofa -l SofaPython3,SofaImGui -g imgui modules/cell.py`.
 - `modules/cementbag.py`: contains the implementation of a cement bag object to interact with the robot. The bag is modelled as a soft body.
