@@ -31,13 +31,17 @@ The implementation and repository are organized as follows:
 ### Images 
 
 #### Cell sensor, inactive and active states (red when in contact)
+<div display="flex"/>
 <img src="data/images/cell-inactive.png" width="30%"/>
 <img src="data/images/cell-active.png" width="30%"/>
+</div>
 
 #### TALOS robot with patches of sensors
+<div display="flex"/>
 <img src="data/images/talos-robot.png" width="30%"/>
 <img src="data/images/robot-patches.png" width="30%"/>
 <img src="data/images/patches.png" width="30%"/>
+</div>
 
 ## Installation 
 
