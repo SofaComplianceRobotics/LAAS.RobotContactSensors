@@ -1,6 +1,11 @@
 import Sofa
+import os
+from utils import projectdirpath
 
 class Ball(Sofa.Prefab):
+    """
+    A prefab representing a deformable ball.
+    """
 
     def __init__(self, attachNode, position=[0, 0, 0], model="volume", color=[0.1, 0.1, 1, 0.3]):
         Sofa.Prefab.__init__(self)
@@ -29,7 +34,7 @@ class Ball(Sofa.Prefab):
         if model == "volume":
             s = 1 * self.scale
             self.addObject("MeshVTKLoader", name="loader", 
-                          filename="data/meshes/ball.vtk", scale=self.scale, translation=self.translation)
+                          filename=os.path.join(projectdirpath,"data/meshes/ball.vtk"), scale=self.scale, translation=self.translation)
         else:
             self.addObject("MeshOBJLoader", 
                             name="loader", 
@@ -47,7 +52,7 @@ class Ball(Sofa.Prefab):
 
     def __addVisual(self):
         visual = self.addChild("Visual")
-        visual.addObject("MeshOBJLoader", filename="mesh/ball.obj", 
+        visual.addObject("MeshOBJLoader", filename="mesh/ball.obj", # From Sofa data repository
                          triangulate=True, scale=self.scale, translation=self.translation)
         visual.addObject("OglModel", src=visual.MeshOBJLoader.linkpath, color=self.color)
         visual.addObject("BarycentricMapping")
@@ -61,5 +66,15 @@ class Ball(Sofa.Prefab):
         collision.addObject("TriangleCollisionModel")
         collision.addObject("BarycentricMapping")
 
+
+# Function to create the scene with the ball
 def createScene(rootnode):
-    Ball(rootnode)
+
+    # Scene setup. Add header (solvers, visual style, gravity, time step, etc.)
+    from modules.header import addHeader, addSolvers
+    settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=False, friction=0)
+    addSolvers(simulation, rayleighStiffness=0.001)
+    rootnode.VisualStyle.displayFlags = ["showVisual"]
+
+    # Add a ball to the scene
+    Ball(simulation) # It will just fall under gravity

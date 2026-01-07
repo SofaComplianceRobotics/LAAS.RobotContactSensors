@@ -2,6 +2,9 @@ def addHeader(rootnode,
               inverse=False, multithreading=False,
               friction=0.6,
               withCollision=False, withConstraint=True):
+    """
+    Utility function to add a standard header to a SOFA scene.
+    """
 
     # Units are in m, kg, s
     # RequiredPlugins
@@ -62,6 +65,9 @@ def addHeader(rootnode,
 
 def addSolvers(node, rayleighMass=0., rayleighStiffness=0.01, firstOrder=False,
                multithreading=False, iterativeSolver=False):
+    """
+    Utility function to add standard solvers to a SOFA scene.
+    """
 
     # Required plugins
     settings = node.getRoot().Settings

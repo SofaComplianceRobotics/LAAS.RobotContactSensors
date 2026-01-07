@@ -1,6 +1,11 @@
 from pysdf import SDF
-from pysdf import Link, State, Model, Link
 import os 
+
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "modules"))
+
+# In this scene, we simulate a Talos humanoid robot with patches of cell sensors on its torso and arms.
+# The position of the cells are extracted from an SDF file of the Talos robot.
 
 def createScene(rootnode):
     import numpy as np
@@ -24,7 +29,6 @@ def createScene(rootnode):
     # Robot
     simulation.addChild(TalosHumanoidRobot("data/talos.urdf"))
     robot = simulation.TalosHumanoidRobot.Robot
-    # robot.init()
 
     # Direct problem
     names = robot.Joints.children
@@ -92,13 +96,10 @@ def createScene(rootnode):
             c = patchs[patch][cell]
             cellsPositions.append(list(c['position'] + c['orientation'])) 
 
-        # patchOrigin = None
         index = None
         for link in robot.Joints.children:
             if patch in link.name.value:
                 index = link.jointMapping.index.value
-                # patchOrigin = np.copy(link.getMechanicalState().position.value[0])
-                # print("Patch", patch, "index", index, "origin", patchOrigin)
                 break
         
         if index is not None:

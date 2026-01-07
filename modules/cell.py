@@ -4,29 +4,31 @@ import numpy as np
 
 class Cell(Sofa.Prefab):
     """
-        Modeling of a cell sensor. Units are m, kg
+    Cell prefab for contact sensors.
+    Modeling of a cell sensor. Units are m, kg
     """
     sideSize: float=0.01
     centerThickness: float=0.002
-    stiffness: float=5e2
+    stiffness: float=5e2 # Stiffness of the spring connecting the deformable part to the rigid part
     totalMass: float=0.001
 
     def __init__(self, 
                  simulationNode: Sofa.Core.Node,
-                 attachNode: Sofa.Core.Node,
-                 name: str="Cell",
-                 attachIndex: int=0,
-                 addToCell=None
+                 attachNode: Sofa.Core.Node, # Node to which the cell is attached (a patch or directly the robot)
+                 name: str="Cell", # Name of the cell (node in the scene graph)
+                 attachIndex: int=0, # Index of the rigid frame to which the cell is attached
+                 addToCell=None # For computation optimization, we add cells forming a patch into a single model
+                 # This avoid the expensive creation of components, such as Mapping, Topology, MechanicalObject, Mass, etc.
                  ):
         Sofa.Prefab.__init__(self)
 
-        self.name = name
+        self.name = name 
         self.simulationNode = simulationNode
-        self.attachNode = attachNode
+        self.attachNode = attachNode 
         self.attachIndex = attachIndex
 
-        self.colorActive = [1, 0, 0, 1]
-        self.colorInactive = [1, 1, 1, 1]
+        self.colorActive = [1, 0, 0, 1] # Color of the top center point when a contact is detected
+        self.colorInactive = [1, 1, 1, 1] # Default color of the top center point
         self.drawMode = 1
         self.drawScale = 0.003
 
@@ -89,12 +91,15 @@ class Cell(Sofa.Prefab):
         """
         Adds cell mechanical, deformable and rigid parts.
         """
+
+        # We create a node containing all the mechanical components shared between the rigid and deformable parts
         all = Sofa.Core.Node("All")
         self.all = all
         all.addObject("MeshTopology", position=self.positions, edges=self.edges, tetras=self.tetras)
         all.addObject("MechanicalObject", position=self.positions)
         all.addObject("UniformMass", totalMass=self.totalMass)
 
+        # Rigid part
         self.rigidified = self.attachNode.addChild(self.name.value + "RigidPart")
         self.rigidified.addObject("MechanicalObject", position=[self.positions[1:]])
         self.rigidified.addObject("RigidMapping", rigidIndexPerPoint=[self.attachIndex]*7, globalToLocalCoords=False,
@@ -110,6 +115,7 @@ class Cell(Sofa.Prefab):
                                         mapMatrices=False,)
         topCenterRestPosition.init()
         
+        # Deformable part
         self.deformable = self.simulationNode.addChild(self.name.value + "DeformablePart")
         self.deformable.addObject("MechanicalObject", position=topCenterRestPosition.getMechanicalState().position.value,
                                     showObject=True, showObjectScale=self.drawScale*1.1, drawMode=self.drawMode, showColor=self.colorInactive)
@@ -120,6 +126,8 @@ class Cell(Sofa.Prefab):
                                   points=[0], stiffness=self.stiffness,
                                   external_points=[0],
                                   external_rest_shape=topCenterRestPosition.getMechanicalState().linkpath) # Spring on the top center of the cell
+       
+        # Mapping between the rigid and deformable parts
         all.addObject('SubsetMultiMapping', template="Vec3,Vec3",
                       mapForces=False,
                       mapMatrices=False,
@@ -130,6 +138,9 @@ class Cell(Sofa.Prefab):
                                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]])
         
     def __addToCell(self, cell):
+        """
+        Adds this cell to an existing cell model (used to create a patche of cells)
+        """
 
         all = cell.all
         offset = len(all.getMechanicalState().position.value)
@@ -178,7 +189,7 @@ class Cell(Sofa.Prefab):
         
     def __addVisual(self):
         """
-        Adds a visual model
+        Adds a visual model of the cell
         """
         visual = self.all.addChild("VisualWhite")
         visual.addObject("OglModel", src=self.all.MeshTopology.linkpath, color=[1, 1, 1, 0.5])
@@ -186,23 +197,33 @@ class Cell(Sofa.Prefab):
 
     def __addCollision(self):
         """
-        Adds a collision model, one point on the center top of the cell.
+        Adds a collision model. We have two options:
+        1. Uncoupled contact forces: This is the preferred method when simulating a large number of sensors. 
+           The contact forces are only detected on the center of each cell, allowing the deformable part of the cell to deform when in contact with an obstable. 
+           This method is computationally efficient but may lead to interpenetration of the robot with the environment. 
+           Plus, the contact forces are not transmitted to the robot. 
+        2. Coupled contact forces: The contact forces are detected on all the voxels of each sensor, allowing for a transmission of the contact forces to the robot. 
+           This method is more accurate but also computationally more expensive.
         """
+        # With the following line only, we obtain the uncoupled contact forces
         self.deformable.addObject("PointCollisionModel", group=1)
-        # Uncomment the following line to have collision on the rigid part too
+
+        # Uncomment the following line to have the coupled contact forces
         # This will transmit the collision forces to the robot joints
         # Note that it will also slow down the simulation 
         # self.rigidified.addObject("PointCollisionModel", group=1)
         
+
+# Example of scene using the Cell prefab
 def createScene(rootnode):
 
+    # Scene setup. Add header (solvers, visual style, gravity, time step, etc.)
     from modules.header import addHeader, addSolvers
-
     settings, modelling, simulation = addHeader(rootnode, inverse=False, withCollision=False, friction=0)
-
     addSolvers(simulation, rayleighStiffness=0.001)
     rootnode.VisualStyle.displayFlags = ["showVisual"]
 
+    # In this example, we create three patches with one cell each   
     for i in range(3):
         patch = simulation.addChild("Patch"+str(i))
         patch.addObject("MechanicalObject", template="Rigid3", position=[[[0, 0, 0.01, 0, 0, 0, 1],
