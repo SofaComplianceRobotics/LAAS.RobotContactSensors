@@ -189,6 +189,10 @@ class Cell(Sofa.Prefab):
         Adds a collision model, one point on the center top of the cell.
         """
         self.deformable.addObject("PointCollisionModel", group=1)
+        # Uncomment the following line to have collision on the rigid part too
+        # This will transmit the collision forces to the robot joints
+        # Note that it will also slow down the simulation 
+        # self.rigidified.addObject("PointCollisionModel", group=1)
         
 def createScene(rootnode):
 

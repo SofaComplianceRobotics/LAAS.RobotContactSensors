@@ -38,6 +38,9 @@ def createScene(rootnode):
                                 value=value
                                 )
         MyGui.MyRobotWindow.addSetting(jointName, joint.value, -pi, pi)
+    # Comment the JointConstraint and use a RestShapeSpringsForceField instead, to have springs on all joints instead of hard constraints
+    # robot.addObject("RestShapeSpringsForceField", stiffness=1e1, angularStiffness=1e1, points=list(range(len(positions))))
+
     # This does not work I don't know why
     # Thus we have to hard code the initial configuration in the first call of URDFModelLoader
     robot.getMechanicalState().position.value = positions
@@ -74,11 +77,11 @@ def createScene(rootnode):
                     [0.00493, 0.294,   0.35093, 0.,      0.,      0.,      1.     ],
                     [0.00493, 0.294,   0.35093, 0.,      0.,      0.,      1.     ],
                     [0.02493, 0.294,   0.07273, 0.,      0.,      0.,      1.     ],
-                    [ 0.00493,  0.294,   -0.19157,  0.,       0.,       0.,       1.     ],
-                    [ 0.00493, -0.294,    0.35093,  0.,       0.,       0.,       1.     ],
-                    [ 0.00493, -0.294,    0.35093,  0.,       0.,       0.,       1.     ],
-                    [ 0.02493, -0.294,    0.07273,  0.,       0.,       0.,       1.     ],
-                    [ 0.00493, -0.294,   -0.19157,  0.,       0.,       0.,       1.     ]]
+                    [0.00493,  0.294,   -0.19157,  0.,       0.,       0.,       1.     ],
+                    [0.00493, -0.294,    0.35093,  0.,       0.,       0.,       1.     ],
+                    [0.00493, -0.294,    0.35093,  0.,       0.,       0.,       1.     ],
+                    [0.02493, -0.294,    0.07273,  0.,       0.,       0.,       1.     ],
+                    [0.00493, -0.294,   -0.19157,  0.,       0.,       0.,       1.     ]]
 
 
     # Create the patches
@@ -105,32 +108,38 @@ def createScene(rootnode):
                   origin=patchOrigins[patchIndex])
             patchIndex += 1
 
-    # # Cement bag
-    # simulation.EulerImplicitSolver.rayleighStiffness.value = 0.03
-    # rootnode.dt.value = 0.005
-    # rootnode.gravity.value = [0, 0, -9.81]
-    # robot.arm_right_5_joint.value = -1.58
-    # robot.arm_left_5_joint.value = 1.58
-    # bag = CementBag(simulation, position=[1.7, 0, 0.2])
-    # bag.getMechanicalState().velocity.value = [[-2.5, 0, 2.7] for i in range(bag.getMechanicalState().size.value)]
-    
-    ball = Ball(simulation, position=[0.25, 0, 0.3], color=[0.1, 0.1, 1, 0.3])
-    ball.addObject("VisualStyle", displayFlags=["showVisual", "showForceFields", "showWireframe"])
 
-    # Animation
-    rootnode.addObject(AnimationManager(rootnode))
-    def animation(target, initialValue, factor, direction, startTime=0.):
-        target.value = initialValue + sin(factor * pi) * 0.2 * direction
+    CEMENTBAG = False
+    if CEMENTBAG:
+        # Cement bag
+        # In this animation a cement bag is dropped on the robot arms
+        simulation.EulerImplicitSolver.rayleighStiffness.value = 0.03 
+        rootnode.dt.value = 0.005
+        rootnode.gravity.value = [0, 0, -9.81]
+        robot.arm_right_5_joint.value = -1.58
+        robot.arm_left_5_joint.value = 1.58
+        bag = CementBag(simulation, position=[1, 0, 0.3]) # Add the bag to the simulation, place it in front of the robot
+        bag.getMechanicalState().velocity.value = [[-5, 0, 0] for i in range(bag.getMechanicalState().size.value)] # Give an initial velocity to the bag to make it fall on the robot arms
+    else:
+        # Ball
+        # In this animation a soft ball is squeezed by the robot arms
+        ball = Ball(simulation, position=[0.25, 0, 0.3], color=[0.1, 0.1, 1, 0.3]) # Add the ball to the simulation, place it in front of the robot
+        ball.addObject("VisualStyle", displayFlags=["showVisual", "showForceFields", "showWireframe"])
 
-    animate(animation, {'target': robot.arm_right_3_joint.value, 
-                        'initialValue':robot.arm_right_3_joint.value.value,
-                        'startTime':0.5,
-                        'direction':1}, 
-                        duration=1., mode='loop')
-    animate(animation, {'target': robot.arm_left_3_joint.value, 
-                        'initialValue':robot.arm_left_3_joint.value.value,
-                        'startTime':0.5,
-                        'direction':-1}, 
-                        duration=1., mode='loop')
+        # Animation of the arms to squeeze the ball
+        rootnode.addObject(AnimationManager(rootnode))
+        def animation(target, initialValue, factor, direction, startTime=0.):
+            target.value = initialValue + sin(factor * pi) * 0.2 * direction
+
+        animate(animation, {'target': robot.arm_right_3_joint.value, 
+                            'initialValue':robot.arm_right_3_joint.value.value,
+                            'startTime':0.5,
+                            'direction':1}, 
+                            duration=1., mode='loop')
+        animate(animation, {'target': robot.arm_left_3_joint.value, 
+                            'initialValue':robot.arm_left_3_joint.value.value,
+                            'startTime':0.5,
+                            'direction':-1}, 
+                            duration=1., mode='loop')
 
     return
